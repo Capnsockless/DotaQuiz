@@ -1,0 +1,7 @@
+version: "3"
+
+services:
+    discordquizbot:
+        build: .
+    #    ports:
+    #      - "322:322"
