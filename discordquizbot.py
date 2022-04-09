@@ -106,9 +106,6 @@ async def on_command_error(ctx, error):
     else:
         raise error
 
-#Get the token and run the bot
-#with open('TOKEN.txt', "r") as text_file:
-#	TOKEN = text_file.read()
-TOKEN = os.getenv('dotaquiztoken')
+TOKEN = str(os.getenv('dotaquiztoken'))
 
 bot.run(TOKEN)
