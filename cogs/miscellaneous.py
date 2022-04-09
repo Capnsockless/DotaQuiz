@@ -5,7 +5,9 @@ import os
 from discord.ext import commands
 import quizdata
 
-os.chdir(os.getcwd())
+jsondir = os.path.dirname(os.getcwd()) + 'jsonfiles'
+
+os.chdir(jsondir)
 
 copypastas, copypastainfo = quizdata.copypastas, quizdata.copypastainfo
 

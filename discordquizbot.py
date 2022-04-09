@@ -6,7 +6,9 @@ import json
 from discord.ext import commands
 import quizdata
 
-os.chdir(os.getcwd())
+jsondir = os.path.dirname(os.getcwd()) + 'jsonfiles'
+
+os.chdir(jsondir)
 
 def open_json(jsonfile):
 	with open(jsonfile, "r") as fp:

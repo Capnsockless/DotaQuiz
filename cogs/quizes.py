@@ -9,7 +9,9 @@ from fuzzywuzzy import fuzz
 from mutagen.mp3 import MP3
 from discord.ext import commands
 
-os.chdir(os.getcwd())
+jsondir = os.path.dirname(os.getcwd()) + 'jsonfiles'
+
+os.chdir(jsondir)
 
 #importing all quizes from quizdata
 import quizdata
