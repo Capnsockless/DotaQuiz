@@ -540,7 +540,7 @@ class Quizes(commands.Cog):
 								usersdict[currentplayer.author] -= 1			#take a point away if answer is wrong
 							counter += 1
 
-	@commands.command(brief = "Plays DotA2 sound effects to recognize.", aliases = ["audio"])
+	@commands.command(brief = "Plays DotA2 sound effects to recognize.", aliases = ["audio"], hidden=True)
 	@commands.cooldown(1, 50, commands.BucketType.user)
 	async def audioquiz(self, ctx):
 		player = Player(ctx.author, ctx)
