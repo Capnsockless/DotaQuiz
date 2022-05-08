@@ -5,9 +5,7 @@ import os
 from discord.ext import commands
 import quizdata
 
-jsondir = os.path.dirname(os.getcwd()) + 'jsonfiles'
-
-os.chdir(jsondir)
+os.chdir(os.getcwd())
 
 copypastas, copypastainfo = quizdata.copypastas, quizdata.copypastainfo
 
@@ -18,13 +16,15 @@ for key, value in copypastainfo.items():
 pastalist = discord.Embed(colour=0x9b59b6)
 pastalist.add_field(name="Copypastas:", value="\n".join(pastas), inline=False)
 
-def open_json(jsonfile):
-    with open(jsonfile, "r") as fp:     #load the users.json file
-        return json.load(fp)        #openfunc for jsonfiles
+jsondir = os.path.dirname(os.getcwd()) + 'jsonfiles'
 
-def save_json(jsonfile, name):      #savefunc for jsonfiles
-    with open(jsonfile, "w") as fp:
-        json.dump(name, fp)
+def open_json(jsonfile):
+	with open(jsondir + '//' + jsonfile, "r") as fp:
+		return json.load(fp)	#openfunc for jsonfiles
+
+def save_json(jsonfile, name):	#savefunc for jsonfiles
+	with open(jsondir + '//' + jsonfile, "w") as fp:
+		json.dump(name, fp)
 
 def strip_str(text):		#function to remove punctuations, spaces and "the" from string and make it lowercase,
 	punctuations = ''' !-;:`'"\,/_?'''			# in order to compare bot answers and user replies

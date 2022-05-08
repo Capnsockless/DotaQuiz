@@ -6,16 +6,16 @@ import json
 from discord.ext import commands
 import quizdata
 
+os.chdir(os.getcwd())
+
 jsondir = os.path.dirname(os.getcwd()) + 'jsonfiles'
 
-os.chdir(jsondir)
-
 def open_json(jsonfile):
-	with open(jsonfile, "r") as fp:
+	with open(jsondir + '//' + jsonfile, "r") as fp:
 		return json.load(fp)	#openfunc for jsonfiles
 
 def save_json(jsonfile, name):	#savefunc for jsonfiles
-	with open(jsonfile, "w") as fp:
+	with open(jsondir + '//' + jsonfile, "w") as fp:
 		json.dump(name, fp)
 
 def strip_str(text):		#function to remove punctuations, spaces from string and make it lowercase,
