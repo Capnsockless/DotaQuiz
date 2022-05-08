@@ -2,6 +2,7 @@ import discord
 import ast
 import os
 import json
+import asyncio
 from discord.ext import commands
 import quizdata
 
@@ -32,13 +33,6 @@ def add_gold(user: discord.User, newgold: int):		#add gold to users
 		save_json("users.json", users)
 		return round(newgold)
 
-def prechecker(user):		#checks user to make sure it's on user.json, if not it will be added
-	users = open_json("users.json")
-	id = str(user.id)
-	if id not in users.keys():
-		users[id] = {"gold":10, "items":"[]", "cheese":0}
-		save_json("users.json", users)
-
 def strip_str(text):        #function to remove punctuations spaces from string and make it lowercase
     punctuations = ''' !-;:'`"\,/_?'''
     text2 = ""
@@ -67,10 +61,10 @@ class Store(commands.Cog):
     @commands.command(brief = "Check how much gold and cheese you own.")
     async def gold(self, ctx):
         users = open_json("users.json")
-        prechecker(ctx.author)
-        if str(ctx.author.id) in users.keys():
-            authorgold = users[str(ctx.author.id)]["gold"]
-            authorcheese = users[str(ctx.author.id)]["cheese"]
+        id = str(ctx.author.id)
+        if id in users.keys():
+            authorgold = users[id]["gold"]
+            authorcheese = users[id]["cheese"]
             await ctx.send(f"**{ctx.author.display_name}** you currently have **``{authorgold}``** gold and ``{authorcheese}`` cheese.")
         else:
             await ctx.send("""You haven't got any gold yet, try "322 help" and use Quiz commands to earn some.""")
@@ -87,12 +81,14 @@ class Store(commands.Cog):
     @commands.command(brief = "Buy an item from the store.")
     async def buy(self, ctx, *, purchase):
         users = open_json("users.json")
-        prechecker(ctx.author)
         id = str(ctx.author.id)
+        if id not in users.keys():
+            await ctx.send("""You haven't got any gold yet, try "322 help" and use Quiz commands to earn some.""")
+            return
         purchasestr = strip_str(purchase)
         user_items = ast.literal_eval(users[id]["items"])       #turn string of list into list
         user_gold = users[id]["gold"]
-        if purchasestr not in [strip_str(x) for x in storekeys]:
+        if purchasestr not in [strip_str(x) for x in storekeys]:    #store validation
             await ctx.send("That item doesn't exist.")
         elif purchasestr == "cheese":
             price = helm_of_dominator(ctx.author, 20000)
@@ -120,8 +116,10 @@ class Store(commands.Cog):
     @commands.command(brief = "Sell an item from your inventory.")
     async def sell(self, ctx, *, sale):
         users = open_json("users.json")
-        prechecker(ctx.author)
         id = str(ctx.author.id)
+        if id not in users.keys():
+            await ctx.send("""You haven't got any gold yet, try "322 help" and use Quiz commands to earn some.""")
+            return
         soldstr = strip_str(sale)             #stripped item to be sold
         user_items = ast.literal_eval(users[id]["items"])           #user inventory
         strippeditems = [strip_str(x) for x in storekeys]       #list of stripped store items
@@ -150,8 +148,10 @@ class Store(commands.Cog):
     @commands.command(brief = "Check your inventory.", aliases = ["inv"])
     async def inventory(self, ctx):         #check inventory
         users = open_json("users.json")
-        prechecker(ctx.author)
         id = str(ctx.author.id)
+        if id not in users.keys():
+            await ctx.send("""You haven't got an inventory yet, try "322 help" and use Quiz commands to earn gold and buy items!""")
+            return
         str_itemlist = ast.literal_eval(users[id]["items"])         #get list of items the user has(they're integers)
         if len(str_itemlist) == 0:              #if inventory is empty
             await ctx.send("Your inventory is empty, try 322 buy to purchase items.")
@@ -182,11 +182,37 @@ class Store(commands.Cog):
             await ctx.send(f"You have successfully transferred {amount} cheese!")
             save_json("users.json", users)
 
+    @commands.command(brief = "Delete your stats.")
+    async def clearstats(self, ctx):
+        users = open_json("users.json")
+        await ctx.send('Are you sure you want to **CLEAR ALL** your gold and your entire inventory? Type "Confirm" to finalize')
+        def check(m):
+            return m.channel == ctx.channel and m.author == ctx.author		#checks if the reply came from the same person in the same channel
+        try:
+            msg = await self.bot.wait_for("message", check=check, timeout=30)
+        except asyncio.TimeoutError:		#If too late
+            await ctx.send("Stat clear **cancelled.**")
+        else:
+            if msg.content == "Confirm":
+                id = str(ctx.author.id)
+                if id in users.keys():
+                    users.pop(id)
+                    save_json("users.json", users)
+                    await ctx.send("Your stats have been **successfully deleted.**")
+                else:
+                    await ctx.send("There was nothing to clear.")
+            else:
+                await ctx.send("Stat clear has been **cancelled.**")
 
     @buy.error
     async def buyerror(self, ctx, error):
         if isinstance (error, commands.MissingRequiredArgument):
             await ctx.send("""You need to specify what item you're purchasing, try "322 store" to see available items.""")
+
+    @sell.error
+    async def sellerror(self, ctx, error):
+        if isinstance (error, commands.MissingRequiredArgument):
+            await ctx.send("""You need to specify what item you're selling, try "322 inventory" to see what you have.""")
 
     @givecheese.error
     async def givecheeseerror(self, ctx, error):
