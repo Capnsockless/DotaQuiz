@@ -1,8 +1,5 @@
 import discord
-import ast
-import os
-import json
-import asyncio
+import os, json, asyncio
 from discord.ext import commands
 import quizdata
 
@@ -24,7 +21,7 @@ def save_json(jsonfile, name):	#savefunc for jsonfiles
 def add_gold(user: discord.User, newgold: int):		#add gold to users
 	users = open_json("users.json")
 	id = str(user.id)
-	if 2200 in ast.literal_eval(users[id]["items"]):
+	if 2200 in users[id]["items"]:
 		users[id]["gold"] = users[id]["gold"] + round(newgold*1.25)
 		save_json("users.json", users)
 		return round(newgold*1.25)
@@ -50,7 +47,7 @@ def take_index(l1, l2):     #Function to find the index of items in a list that 
 
 def helm_of_dominator(author, price):       #give discount if userhas helm of the dominator
     users = open_json("users.json")
-    if 2350 in ast.literal_eval(users[str(author.id)]["items"]):
+    if 2350 in users[str(author.id)]["items"]:
         price *= 0.95
     return round(price)
 
@@ -86,7 +83,7 @@ class Store(commands.Cog):
             await ctx.send("""You haven't got any gold yet, try "322 help" and use Quiz commands to earn some.""")
             return
         purchasestr = strip_str(purchase)
-        user_items = ast.literal_eval(users[id]["items"])       #turn string of list into list
+        user_items = users[id]["items"]
         user_gold = users[id]["gold"]
         if purchasestr not in [strip_str(x) for x in storekeys]:    #store validation
             await ctx.send("That item doesn't exist.")
@@ -108,7 +105,7 @@ class Store(commands.Cog):
                 await ctx.send(f"You don't have enough gold, this item costs {storevalues[itemindex]} gold.")
             else:               #item being purchased
                 user_items.append(storevalues[itemindex])       #new item price is appended to users item list
-                users[id]["items"] = str(user_items)        #update the list back as a string of a list
+                users[id]["items"] = user_items        #update the list back as a string of a list
                 users[id]["gold"] = users[id]["gold"] - price      #take away gold
                 await ctx.send("You have purchased the item.")
                 save_json("users.json", users)
@@ -121,7 +118,7 @@ class Store(commands.Cog):
             await ctx.send("""You haven't got any gold yet, try "322 help" and use Quiz commands to earn some.""")
             return
         soldstr = strip_str(sale)             #stripped item to be sold
-        user_items = ast.literal_eval(users[id]["items"])           #user inventory
+        user_items = users[id]["items"]           #user inventory
         strippeditems = [strip_str(x) for x in storekeys]       #list of stripped store items
         if soldstr == "cheese":
             if users[id]["cheese"] <= 0:
@@ -136,7 +133,7 @@ class Store(commands.Cog):
             itemcost = storevalues[itemindex]
             if itemcost in user_items:          #if item is inside user inventory
                 user_items.remove(itemcost)     #remove the item from inventory, add half the gold in
-                users[id]["items"] = str(user_items)
+                users[id]["items"] = user_items
                 users[id]["gold"] = users[id]["gold"] + int(itemcost/2)
                 await ctx.send(f"You sold the item for {int(itemcost/2)} gold.")
                 save_json("users.json", users)
@@ -152,7 +149,7 @@ class Store(commands.Cog):
         if id not in users.keys():
             await ctx.send("""You haven't got an inventory yet, try "322 help" and use Quiz commands to earn gold and buy items!""")
             return
-        str_itemlist = ast.literal_eval(users[id]["items"])         #get list of items the user has(they're integers)
+        str_itemlist = users[id]["items"]         #get list of items the user has(they're integers)
         if len(str_itemlist) == 0:              #if inventory is empty
             await ctx.send("Your inventory is empty, try 322 buy to purchase items.")
         else:
@@ -228,5 +225,5 @@ class Store(commands.Cog):
         else:
             raise error
 
-def setup(bot):
-    bot.add_cog(Store(bot))
+async def setup(bot):
+    await bot.add_cog(Store(bot))

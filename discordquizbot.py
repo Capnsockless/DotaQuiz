@@ -1,8 +1,6 @@
 import discord
-import os
+import os, json, asyncio, itertools
 import sys, traceback
-import itertools
-import json
 from discord.ext import commands
 import quizdata
 
@@ -57,19 +55,8 @@ class MyHelpCommand(commands.HelpCommand):
 		cmd_info = command_dinfos[strip_str(str(command))]
 		await self.get_destination().send(f"{cmd_info}")
 
-intents = discord.Intents(messages=True, members=True, guilds=True, typing=False, presences=False, voice_states=True)
+intents = discord.Intents.all()
 bot = commands.Bot(command_prefix='322 ', case_insensitive=True, help_command=MyHelpCommand(), intents=intents)
-
-
-startcogs = ["cogs.quizes", "cogs.store", "cogs.miscellaneous"]     #list of cogs to load
-
-if __name__ == '__main__':              #loading the cogs from the directory ./cogs
-    for extension in startcogs:
-        try:
-            bot.load_extension(extension)
-        except Exception as e:
-            print(f'Failed to load extension {extension}.', file=sys.stderr)
-            traceback.print_exc()
 
 @bot.event
 async def on_ready():
@@ -108,6 +95,20 @@ async def on_command_error(ctx, error):
     else:
         raise error
 
+startcogs = ["cogs.quizes", "cogs.store", "cogs.miscellaneous"]     #list of cogs to load
 TOKEN = str(os.getenv('dotaquiztoken'))
 
-bot.run(TOKEN)
+async def load_extensions():
+	for extension in startcogs:
+		try:
+			await bot.load_extension(extension)
+		except Exception as e:
+			print(f'Failed to load extension {extension}.', file=sys.stderr)
+			traceback.print_exc()
+
+async def main():
+    async with bot:
+        await load_extensions()
+        await bot.start(TOKEN)
+
+asyncio.run(main())

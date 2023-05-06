@@ -1,10 +1,6 @@
 import random
 import discord
-import asyncio
-import json
-import ast
-import time
-import os
+import json, time, os, asyncio
 from fuzzywuzzy import fuzz
 from mutagen.mp3 import MP3
 from discord.ext import commands
@@ -74,21 +70,21 @@ class Player():
 		self.rng = open_json("rngfix.json")
 		id = str(self.author.id)
 		if id not in self.users.keys():
-			self.users[id] = {"gold":10, "items":"[]", "cheese":0}
+			self.users[id] = {"gold":10, "items":[], "cheese":0}
 			save_json("users.json", self.users)
 		serv_id = str(self.server.id)
 		if serv_id not in self.rng.keys():
-			self.rng[serv_id] = {"questnumbers":"[]", "shopkeepnumbers":"[]", "iconquiznumbers":"[]", "audioquiznumbers":"[]", "scramblenumbers":"[]", "vacuumcd":16}
+			self.rng[serv_id] = {"questnumbers":[], "shopkeepnumbers":[], "iconquiznumbers":[], "audioquiznumbers":[], "scramblenumbers":[], "vacuumcd":16}
 			save_json("rngfix.json", self.rng)
 		try:
-			self.inventory = ast.literal_eval(self.users[str(author.id)]["items"])
+			self.inventory = self.users[str(author.id)]["items"]
 		except KeyError:
 			self.inventory = []
 		self.saves = (4600 in self.inventory)
 
 	def unique_int_randomizer(self, length, listkey):		#player.unique_int_randomizer used in par with the rngfix.json file to avoid repeating numbers(questions)
 		serv_id = str(self.server.id)
-		numlist = ast.literal_eval(self.rng[serv_id][listkey])			#convert list string to list
+		numlist = self.rng[serv_id][listkey]
 		if len(numlist) > length*7/8:			#if amount of numbers surpass 7/8ths of the total amount delete a chunk of the numbers at the start
 			del numlist[:round(length/7)]
 
@@ -101,9 +97,12 @@ class Player():
 				n += 1
 		#update the json file and return the valid number
 		numlist.append(n)
-		self.rng[serv_id][listkey] = str(numlist)		#convert list back to string list
+		self.rng[serv_id][listkey] = numlist		#convert list back to string list
 		save_json("rngfix.json", self.rng)
 		return n
+
+	def get_MKB(self):
+		return 4852 in self.inventory
 
 	def compare_strings(self, text, answer):			#function to compare user input and actual answer
 		striptext = strip_str(text)		#first we use strip_str on both strings which removes spaces, "the" and unwanted symbols
@@ -940,7 +939,7 @@ class Quizes(commands.Cog):
 	async def quizerror(self, ctx, error):
 		if isinstance(error, commands.CommandOnCooldown):
 			users = open_json("users.json")
-			if 5000 in ast.literal_eval(users[str(ctx.message.author.id)]["items"]):
+			if 5000 in users[str(ctx.message.author.id)]["items"]:
 				if error.retry_after < 3:		#if user has octarine and the remaining time of the cooldown is Less
 					await ctx.reinvoke()		#than the time octarine saves the user just bypasses the cooldownerror
 					return
@@ -953,7 +952,7 @@ class Quizes(commands.Cog):
 	async def iconquizerror(self, ctx, error):
 		if isinstance(error, commands.CommandOnCooldown):
 			users = open_json("users.json")
-			if 5000 in ast.literal_eval(users[str(ctx.message.author.id)]["items"]):
+			if 5000 in users[str(ctx.message.author.id)]["items"]:
 				if error.retry_after < 13:
 					await ctx.reinvoke()
 					return
@@ -966,7 +965,7 @@ class Quizes(commands.Cog):
 	async def scrambleerror(self, ctx, error):
 		if isinstance(error, commands.CommandOnCooldown):
 			users = open_json("users.json")
-			if 5000 in ast.literal_eval(users[str(ctx.message.author.id)]["items"]):
+			if 5000 in users[str(ctx.message.author.id)]["items"]:
 				if error.retry_after < 3:
 					await ctx.reinvoke()
 					return
@@ -979,7 +978,7 @@ class Quizes(commands.Cog):
 	async def shopquizerror(self, ctx, error):
 		if isinstance(error, commands.CommandOnCooldown):
 			users = open_json("users.json")
-			if 5000 in ast.literal_eval(users[str(ctx.message.author.id)]["items"]):
+			if 5000 in users[str(ctx.message.author.id)]["items"]:
 				if error.retry_after < 12.5:
 					await ctx.reinvoke()
 					return
@@ -1018,7 +1017,7 @@ class Quizes(commands.Cog):
 	async def endlesserror(self, ctx, error):
 		if isinstance(error, commands.CommandOnCooldown):
 			users = open_json("users.json")
-			if 5000 in ast.literal_eval(users[str(ctx.message.author.id)]["items"]):
+			if 5000 in users[str(ctx.message.author.id)]["items"]:
 				if error.retry_after < 100:
 					await ctx.reinvoke()
 					return
@@ -1034,5 +1033,5 @@ class Quizes(commands.Cog):
 		else:
 			raise error
 
-def setup(bot):
-	bot.add_cog(Quizes(bot))
+async def setup(bot):
+	await bot.add_cog(Quizes(bot))

@@ -1,7 +1,6 @@
 import random
 import discord
-import json
-import os
+import os, json
 from discord.ext import commands
 import quizdata
 
@@ -77,7 +76,7 @@ class Miscellaneous(commands.Cog):
         rng = open_json("rngfix.json")
         id = str(ctx.guild.id)
         if id not in rng.keys():
-            rng[id] = {"questnumbers":"[]", "shopkeepnumbers":"[]", "iconquiznumbers":"[]", "audioquiznumbers":"[]", "scramblenumbers":"[]", "vacuumcd":16}
+            rng[id] = {"questnumbers":[], "shopkeepnumbers":[], "iconquiznumbers":[], "audioquiznumbers":[], "scramblenumbers":[], "vacuumcd":16}
         rng[id]["vacuumcd"] += random.randint(1, 3)
         await ctx.send(f"""Vacuum cooldown has been increased, it is now **{rng[id]["vacuumcd"]}** seconds long.""")
         save_json("rngfix.json", rng)
@@ -97,5 +96,5 @@ class Miscellaneous(commands.Cog):
         else:
             raise error
 
-def setup(bot):
-    bot.add_cog(Miscellaneous(bot))
+async def setup(bot):
+    await bot.add_cog(Miscellaneous(bot))
