@@ -17,8 +17,6 @@ questlen, shopkeeplen, iconquizlen, audioquizlen, scramblelen = len(questlist)-1
 #getting all of their keys and values as seperate lists
 audioquizkeys, audioquizvalues = list(audioquizdict.keys()), list(audioquizdict.values())
 
-#for scramble
-charemojies = quizdata.charemojies
 #for shopquiz and simpleiconquiz
 ingredients, iconnames, alphabet = quizdata.ingredients, quizdata.iconnames, quizdata.alphabet
 #Prize percentages for 322 freeforall
@@ -158,13 +156,9 @@ class Quizes(commands.Cog):
 	async def scramble(self, ctx):
 		player = Player(ctx.author, ctx)
 		scramblen = player.unique_int_randomizer(scramblelen, "scramblenumbers")			#Random number to give a random question
-		correctansw = scramblelist[scramblen]			#the correct answer
-		scrambledworde = []			#empty list to .join() emojies onto
-		charlist = list(correctansw.lower().replace("'", ""))			#converting string to list
-		for char in random.sample(charlist, len(charlist)):		#shuffling the word list and looping through it
-			scrambledworde.append(charemojies[char])		#picking up values of charemojies of the lowercase characters
-		output = " ".join(scrambledworde)					#joining them to form a string of all emojies to output
-		await ctx.send(f"**``Unscramble this name:``**\n{output}")
+		scrambleobj = scramblelist[scramblen]
+		correctansw = scrambleobj.get_word()			#the correct answer
+		await ctx.send(f"**``Unscramble this name:``**\n{scrambleobj.get_scramble()}")
 		def check(m):
 			return m.channel == player.channel and m.author == player.author		#checks if the reply came from the same person in the same channel
 		try:
@@ -172,8 +166,8 @@ class Quizes(commands.Cog):
 		except asyncio.TimeoutError:		#If too late
 			await ctx.send(f"**{quizdata.get_answ('L')}** The correct answer was ``{correctansw}``")
 		else:
-			if player.compare_strings(msg.content, correctansw):
-				g = player.add_gold(min(12, len(correctansw))*8)
+			if scrambleobj.check_answer(msg.content, player.MKB):
+				g = player.add_gold(scrambleobj.value)
 				await ctx.send(f"**{quizdata.get_answ('R')}** you got ``{g}`` gold.")
 			else:
 				await ctx.send(f"**{quizdata.get_answ('W')}** The correct answer was ``{correctansw}``")
