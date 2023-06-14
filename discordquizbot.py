@@ -55,7 +55,7 @@ class MyHelpCommand(commands.HelpCommand):
 		cmd_info = command_dinfos[strip_str(str(command))]
 		await self.get_destination().send(f"{cmd_info}")
 
-intents = discord.Intents.all()
+intents = discord.Intents(messages=True, message_content=True, guilds=True, guild_messages=True, members=True, presences=False)
 bot = commands.Bot(command_prefix='322 ', case_insensitive=True, help_command=MyHelpCommand(), intents=intents)
 
 @bot.event
