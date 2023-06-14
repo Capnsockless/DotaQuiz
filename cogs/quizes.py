@@ -316,9 +316,8 @@ class Quizes(commands.Cog):
 				break
 			shopkeepn = player.unique_int_randomizer(shopkeeplen, "shopkeepnumbers")
 			shopkeepobj = shopkeeplist[shopkeepn]
-			itemembed = shopkeepobj.create_embed()
-			#await ctx.send(file=itemimage, embed=itemembed)
-			await ctx.send(embed=itemembed)
+			itemimage, itemembed = shopkeepobj.create_embed()
+			await ctx.send(file=itemimage, embed=itemembed)
 			def check(m):
 				return m.channel == player.channel and m.author == player.author
 			try:
@@ -347,7 +346,7 @@ class Quizes(commands.Cog):
 						ncorrectanswsinarow = player.clutched(ncorrectanswsinarow)
 						await ctx.send(f"**{quizdata.get_answ('W')}**, This item can be built with ``{shopkeepobj.get_answer()}`` You have ``{lives}`` lives remaining.")
 
-	@commands.command(brief = "Set of questions multiple people can answer.", aliases = ["ffa"])
+	@commands.command(brief = "Set of questions multiple people can answer.", aliases = ["ffa"], hidden=True)
 	@commands.cooldown(1, 80, commands.BucketType.channel)
 	async def freeforall(self, ctx):
 		player = Player(ctx.author, ctx)
@@ -540,11 +539,12 @@ class Quizes(commands.Cog):
 	@commands.cooldown(1, 52, commands.BucketType.channel)
 	async def blitz(self, ctx):
 		player = Player(ctx.author, ctx)
-		timeout = time.time() + player.set_duration(50)		#full time for blitz round
+		timeout = player.set_duration(50) #full time for blitz round
 		accumulated_g = 0
 		ncorrectansws = 0
-		await ctx.send(f"""You have ``{player.set_duration(48)}`` seconds for the blitz, don't forget to type in **skip** if you don't know the answer to minimize the gold and time you lose.""")
+		await ctx.send(f"""You have ``{timeout}`` seconds for the blitz, don't forget to type in **skip** if you don't know the answer to minimize the gold and time you lose.""")
 		time.sleep(3.7)
+		timeout += time.time()
 		while True:
 			time.sleep(0.2)
 			if time.time() > timeout:			#stop the blitz, add accumulated gold to user.
@@ -552,39 +552,34 @@ class Quizes(commands.Cog):
 				await ctx.send(f"**{player.author.display_name}** you got ``{ncorrectansws}`` correct answers and accumulated ``{g}`` gold during the blitz.")
 				break
 			questn = player.unique_int_randomizer(questlen, "questnumbers")		#Random number to give a random question
-			question, answer = questkeys[questn], questvalues[questn]
-			correctansw = find_correct_answer(answer)
-			if type(question) == tuple:		#if the question comes with an image
+			questobj = questlist[questn]
+			question = questobj.get_question()
+			if questobj.questionType == 2:		#if the question comes with an image
 				await ctx.send(f"**```{question[0]}```**", file=discord.File(f"./quizimages/{question[1]}"))
-				giventime = player.set_duration(calc_time(question[0], answer))
 			else:										#for normal string questions
 				await ctx.send(f"**```{question}```**")
-				giventime = player.set_duration(calc_time(question, answer))
+			straddon = 'The correct answer was' #For incorrect answer
+			if questobj.answerType != 1:
+				straddon = 'One of the possible correct answer was'
 			def check(m):
 				return m.channel == player.channel and m.author == player.author		#checks if the reply came from the same person in the same channel
 			try:
-				msg = await self.bot.wait_for("message", check=check, timeout=player.set_duration(giventime))
+				msg = await self.bot.wait_for("message", check=check, timeout=player.set_duration(questobj.get_time()))
 			except asyncio.TimeoutError:			#If too late
-				await ctx.send(f"**{quizdata.get_answ('L')}**, The correct answer was ``{correctansw}``.")
+				await ctx.send(f"**{quizdata.get_answ('L')}** {straddon} ``{questobj.get_answer()}``")
 				accumulated_g -= 21
 			else:
 				if strip_str(msg.content) == "skip":		#if user wants to move onto the next question
 					accumulated_g -= 4
-					if type(answer) == str or type(answer) == tuple:
-						await ctx.send(f"The correct answer was ``{correctansw}``.")
-					else:
-						await ctx.send(f"One of the possible answers was ``{correctansw}``.")
-				elif player.compare_strings(msg.content, answer):		#If there is one correct answer
+					await ctx.send(f"**{straddon} ``{questobj.get_answer()}``")
+				elif questobj.check_answer(msg.content, player.MKB):		#If there is one correct answer
 					accumulated_g += 18
 					ncorrectansws += 1
 				else:
 					accumulated_g -= 12
-					if type(answer) == list:
-						await ctx.send(f"**{quizdata.get_answ('W')}** One of the possible answers was ``{correctansw}``")
-					else:
-						await ctx.send(f"**{quizdata.get_answ('W')}** The correct answer was ``{correctansw}``.")
+					await ctx.send(f"**{quizdata.get_answ('W')}** {straddon} ``{questobj.get_answer()}``")
 
-	@commands.command(brief = "Duel another user for gold.")
+	@commands.command(brief = "Duel another user for gold.", hidden=True)
 	@commands.cooldown(1, 45, commands.BucketType.channel)
 	async def duel(self, ctx, opponent: discord.Member, wager:int):
 		player1 = Player(ctx.author, ctx)
@@ -679,7 +674,7 @@ class Quizes(commands.Cog):
 				else:
 					await ctx.send("The opponent has declined the offer.")
 
-	@commands.command(brief = "Endless mix of questions, items, icons and scrambles.")
+	@commands.command(brief = "Endless mix of questions, items, icons and scrambles.", hidden=True)
 	@commands.cooldown(1, 400, commands.BucketType.user)
 	async def endless(self, ctx):
 		player = Player(ctx.author, ctx)

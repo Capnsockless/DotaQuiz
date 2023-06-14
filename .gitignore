@@ -4,3 +4,5 @@ TOKEN.txt
 tests.py
 imageadder.py
 dotaicons
+__pycache__
+cogs/__pycache__
