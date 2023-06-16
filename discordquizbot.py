@@ -6,7 +6,7 @@ import quizdata
 
 os.chdir(os.getcwd())
 
-jsondir = os.path.dirname(os.getcwd()) + 'jsonfiles'
+jsondir = os.path.dirname(os.getcwd()) + '//jsonfiles'
 
 def open_json(jsonfile):
 	with open(jsondir + '//' + jsonfile, "r") as fp:

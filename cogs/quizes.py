@@ -9,20 +9,14 @@ os.chdir(os.getcwd())
 
 #importing all quizes from quizdata
 import quizdata
-questlist, shopkeeplist, iconquizlist = quizdata.questlist, quizdata.shopkeeplist, quizdata.iconquizlist
-#questdict is for quiz, blitz, duel, freeforall, shopkeepdict is for shopquiz, iconquizdict - iconquiz, audioquiz - audioquiz, scramblelist - scramble
-audioquizdict, scramblelist = quizdata.audioquizdict, quizdata.scramblelist
+questlist, shopkeeplist, iconquizlist, scramblelist = quizdata.questlist, quizdata.shopkeeplist, quizdata.iconquizlist, quizdata.scramblelist
 #getting their lengths for the indicies, hence the -1
-questlen, shopkeeplen, iconquizlen, audioquizlen, scramblelen = len(questlist)-1, len(shopkeeplist)-1, len(iconquizlist)-1, len(audioquizdict)-1, len(scramblelist)-1
-#getting all of their keys and values as seperate lists
-audioquizkeys, audioquizvalues = list(audioquizdict.keys()), list(audioquizdict.values())
+questlen, shopkeeplen, iconquizlen, scramblelen = len(questlist)-1, len(shopkeeplist)-1, len(iconquizlist)-1, len(scramblelist)-1
 
-#for shopquiz and simpleiconquiz
-ingredients, iconnames, alphabet = quizdata.ingredients, quizdata.iconnames, quizdata.alphabet
 #Prize percentages for 322 freeforall
 prizeperc = {0:0.6, 1:0.2, 2:0.1, 3:0.05, 4:0.05}
 
-jsondir = os.path.dirname(os.getcwd()) + 'jsonfiles'
+jsondir = os.path.dirname(os.path.dirname(os.getcwd())) + "//jsonfiles"
 
 def open_json(jsonfile):
 	with open(jsondir + '//' + jsonfile, "r") as fp:
@@ -460,75 +454,6 @@ class Quizes(commands.Cog):
 								usersdict[currentplayer.author] -= 1			#take a point away if answer is wrong
 							counter += 1
 
-	@commands.command(brief = "Plays DotA2 sound effects to recognize.", aliases = ["audio"], hidden=True)
-	@commands.cooldown(1, 50, commands.BucketType.user)
-	async def audioquiz(self, ctx):
-		player = Player(ctx.author, ctx)
-		timeout = time.time() + player.set_duration(38)						#timeout set
-		accumulated_g = 0													#gold that will be given to the user at the end
-		ncorrectansws = 0													#number of sounds they answered
-		if player.author.voice is None:								#if user not in a vc
-			await ctx.send("You must be in a visible voice channel to use this command.")
-			self.audioquiz.reset_cooldown(ctx)
-		else:
-			voicechannel = await player.author.voice.channel.connect()
-			await ctx.send(f"""You have base ``{player.set_duration(38)}`` seconds for the audioquiz each correct answer grants you 3 more seconds, answer which **item** or **spell** makes the played sound effect, don't forget to type in **replay** or **re** to replay the audio or **skip** entirely skip it.""")
-			time.sleep(2)
-			while True:
-				if time.time() > timeout:			#stop the quiz, add accumulated gold to user.
-					g = player.add_gold(ncorrectansws*(accumulated_g+(2*ncorrectansws)-2))		#((2a+d(n-1))/2)n a = 0 d = 4  n = ncorrectanswsers
-					await ctx.send(f"**{player.author.display_name}** you got ``{ncorrectansws}`` correct answers and accumulated ``{g}`` gold during the audioquiz.")
-					await ctx.voice_client.disconnect()
-					break
-				time.sleep(0.2)
-				audion = player.unique_int_randomizer(audioquizlen, "audioquiznumbers")		#Random number to give a random audioion
-				question, answer = audioquizkeys[audion], audioquizvalues[audion]
-				correctansw = find_correct_answer(answer)	#find correct answer to display later
-				duration = round(MP3(f"./soundquizaudio/{question}").info.length+3)   #duration of the audiofile in seconds
-				source = await discord.FFmpegOpusAudio.from_probe(f"./soundquizaudio/{question}")	#convert audio to opus
-				ctx.voice_client.stop()			#stop audio to make sure next sound can play
-				ctx.voice_client.play(source)
-				def check(m):
-					return m.channel == player.channel and m.author == player.author		#checks if the reply came from the same person in the same channel
-				while True:
-					try:					#vvvv calc_time() takes strings as arguments so duration is converted to a string by multiplying "a"
-						msg = await self.bot.wait_for("message", check=check, timeout=player.set_duration(calc_time("a"*8*duration, answer)))
-					except asyncio.TimeoutError:			#If too late
-						await ctx.send(f"**{quizdata.get_answ('L')}**, The correct answer was ``{correctansw}``.")
-						accumulated_g -= 10
-						break
-					else:
-						if strip_str(msg.content) == "skip":		#if user wants to move onto the next audioion
-							accumulated_g -= 4
-							if type(answer) == list:
-								await ctx.send(f"One of the possible answers was ``{correctansw}``.")
-							else:
-								await ctx.send(f"The correct answer was ``{correctansw}``.")
-							break
-						elif strip_str(msg.content) == "stop" or strip_str(msg.content) == "stfu":		#if user stops the quiz
-							timeout = 0
-							break
-						elif strip_str(msg.content) == "replay" or strip_str(msg.content) == "re":
-							try:
-								ctx.voice_client.stop()			#stop audio to make sure next sound can play
-							except:
-								pass
-							source = await discord.FFmpegOpusAudio.from_probe(f"./soundquizaudio/{question}")	#convert audio to opus
-							ctx.voice_client.play(source)
-						elif player.compare_strings(msg.content, answer):	#If there is one correct answer
-							await ctx.send(f"**{quizdata.get_answ('R')}**")
-							timeout += 3							#add time before timeout for every correct answer
-							accumulated_g += 23
-							ncorrectansws += 1
-							break
-						else:
-							accumulated_g -= 4
-							if type(answer) == list:
-								await ctx.send(f"**{quizdata.get_answ('W')}** One of the possible answers was ``{correctansw}``")
-							else:
-								await ctx.send(f"**{quizdata.get_answ('W')}** The correct answer was ``{correctansw}``.")
-							break
-
 	@commands.command(brief = "Rapid questions that give more gold but with a risk.")
 	@commands.cooldown(1, 52, commands.BucketType.channel)
 	async def blitz(self, ctx):
@@ -903,11 +828,6 @@ class Quizes(commands.Cog):
 					await ctx.send("**Shopkeepers quiz** is on **cooldown** at the moment.")
 			else:
 				await ctx.send("**Shopkeepers quiz** is on **cooldown** at the moment. You can buy an Octarine Core in the store to decrease command cooldowns.")
-
-	@audioquiz.error
-	async def audioquizerror(self, ctx, error):
-		if isinstance(error, commands.CommandOnCooldown):
-			await ctx.send("**Audioquiz** is currently on cooldown. You can purchase an Octarine Core to decrease command cooldowns.")
 
 	@blitz.error
 	async def blitzerror(self, ctx, error):

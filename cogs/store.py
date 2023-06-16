@@ -8,7 +8,7 @@ os.chdir(os.getcwd())
 store_items, store_descriptions = quizdata.store_items, quizdata.store_descriptions
 storekeys, storevalues = list(store_items.keys()), list(store_items.values())
 
-jsondir = os.path.dirname(os.getcwd()) + 'jsonfiles'
+jsondir = os.path.dirname(os.path.dirname(os.getcwd())) + "//jsonfiles"
 
 def open_json(jsonfile):
 	with open(jsondir + '//' + jsonfile, "r") as fp:

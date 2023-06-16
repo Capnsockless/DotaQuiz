@@ -15,7 +15,7 @@ for key, value in copypastainfo.items():
 pastalist = discord.Embed(colour=0x9b59b6)
 pastalist.add_field(name="Copypastas:", value="\n".join(pastas), inline=False)
 
-jsondir = os.path.dirname(os.getcwd()) + 'jsonfiles'
+jsondir = os.path.dirname(os.path.dirname(os.getcwd())) + "//jsonfiles"
 
 def open_json(jsonfile):
 	with open(jsondir + '//' + jsonfile, "r") as fp:
