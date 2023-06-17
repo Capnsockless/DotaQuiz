@@ -4,6 +4,12 @@ import sys, traceback
 from discord.ext import commands
 import quizdata
 
+#Adding parent directory to path so cogs can import quizdata
+#print(sys.path)
+current = os.path.dirname(os.path.realpath(__file__))
+sys.path.append(current)
+#print(sys.path)
+
 os.chdir(os.getcwd())
 
 jsondir = os.path.dirname(os.getcwd()) + '//jsonfiles'

@@ -1,6 +1,6 @@
 import random
 import discord
-import json, time, os, asyncio, sys
+import json, time, os, asyncio
 from fuzzywuzzy import fuzz
 from mutagen.mp3 import MP3
 from discord.ext import commands
@@ -8,9 +8,6 @@ from discord.ext import commands
 os.chdir(os.getcwd())
 
 #importing all quizes from quizdata
-current = os.path.dirname(os.path.realpath(__file__))
-parent = os.path.dirname(current)
-sys.path.append(parent)
 import quizdata
 questlist, shopkeeplist, iconquizlist, scramblelist = quizdata.questlist, quizdata.shopkeeplist, quizdata.iconquizlist, quizdata.scramblelist
 #getting their lengths for the indicies, hence the -1

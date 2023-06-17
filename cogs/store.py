@@ -1,9 +1,6 @@
 import discord
-import os, json, asyncio, sys
+import os, json, asyncio
 from discord.ext import commands
-current = os.path.dirname(os.path.realpath(__file__))
-parent = os.path.dirname(current)
-sys.path.append(parent)
 import quizdata
 
 os.chdir(os.getcwd())
@@ -34,7 +31,7 @@ def add_gold(user: discord.User, newgold: int):		#add gold to users
 		return round(newgold)
 
 def strip_str(text):        #function to remove punctuations spaces from string and make it lowercase
-    punctuations = ''' !-;:'`"\,/_?'''
+    punctuations = ''' !-;:'`" \,/_?'''
     text2 = ""
     for char in text:
        if char not in punctuations:

@@ -1,6 +1,7 @@
 import random as rand
 from fuzzywuzzy import fuzz
 import discord
+import random
 
 def strip_str(text):		#function to remove punctuations, spaces from string and make it lowercase,
 	punctuations = ''' !-;:`'".,/_?'''
@@ -151,7 +152,7 @@ class ScrambleObj():
 	def get_scramble(self):
 		scrambledworde = []			#empty list to .join() emojies onto
 		charlist = list(self.word.lower().replace("'", ""))			#converting string to list
-		for char in rand.sample(charlist, len(charlist)):		#shuffling the word list and looping through it
+		for char in random.sample(charlist, len(charlist)):		#shuffling the word list and looping through it
 			scrambledworde.append(charemojies[char])		#picking up values of charemojies of the lowercase characters
 		output = " ".join(scrambledworde)					#joining them to form a string of all emojies to output
 		return output
@@ -198,8 +199,8 @@ class ShopItem:
 		itemembed.set_thumbnail(url=f"attachment://{self.image}")
 		possibleansws = self.items.copy()		#all the possible answers, starts with the correct ones
 		while len(possibleansws) < 11:		#adds random items
-			possibleansws.append(rand.choice(ingredients))
-		self.shuffled = rand.sample(possibleansws, k=11)		#shuffled list of random and correct items
+			possibleansws.append(random.choice(ingredients))
+		self.shuffled = random.sample(possibleansws, k=11)		#shuffled list of random and correct items
 		self.shuffled.append("Recipe")
 		result = ""		#result to display with proper spacing and all
 		for i in range(12):
