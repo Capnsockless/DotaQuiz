@@ -8,14 +8,14 @@ os.chdir(os.getcwd())
 store_items, store_descriptions = quizdata.store_items, quizdata.store_descriptions
 storekeys, storevalues = list(store_items.keys()), list(store_items.values())
 
-jsondir = os.path.dirname(os.path.dirname(os.getcwd())) + "//jsonfiles"
+jsondir = os.path.dirname(os.path.dirname(os.getcwd())) + "/jsonfiles"
 
 def open_json(jsonfile):
-	with open(jsondir + '//' + jsonfile, "r") as fp:
+	with open(jsondir + '/' + jsonfile, "r") as fp:
 		return json.load(fp)	#openfunc for jsonfiles
 
 def save_json(jsonfile, name):	#savefunc for jsonfiles
-	with open(jsondir + '//' + jsonfile, "w") as fp:
+	with open(jsondir + '/' + jsonfile, "w") as fp:
 		json.dump(name, fp)
 
 def add_gold(user: discord.User, newgold: int):		#add gold to users
@@ -133,31 +133,37 @@ class Store(commands.Cog):
 
     @commands.command(brief = "Check how much gold and cheese you own.")
     async def gold(self, ctx):
-        users = open_json("users.json")
-        id = str(ctx.author.id)
-        if id in users.keys():
-            authorgold = users[id]["gold"]
-            authorcheese = users[id]["cheese"]
-            await ctx.send(f"**{ctx.author.display_name}** you currently have **``{authorgold}``** gold and ``{authorcheese}`` cheese.")
-        else:
-            await ctx.send("""You haven't got any gold yet, try "322 help" and use Quiz commands to earn some.""")
+        try:
+            users = open_json("users.json")
+            id = str(ctx.author.id)
+            if id in users.keys():
+                authorgold = users[id]["gold"]
+                authorcheese = users[id]["cheese"]
+                await ctx.send(f"**{ctx.author.display_name}** you currently have **``{authorgold}``** gold and ``{authorcheese}`` cheese.")
+            else:
+                await ctx.send("""You haven't got any gold yet, try "322 help" and use Quiz commands to earn some.""")
+        except Exception as e:
+            print("store.py, gold: ", e)
 
 
     @commands.command(brief = "Check your inventory.", aliases = ["inv"])
     async def inventory(self, ctx):         #check inventory
-        users = open_json("users.json")
-        id = str(ctx.author.id)
-        if id not in users.keys():
-            await ctx.send("""You haven't got an inventory yet, try "322 help" and use Quiz commands to earn gold and buy items!""")
-            return
-        str_itemlist = users[id]["items"]         #get list of items the user has(they're integers)
-        if len(str_itemlist) == 0:              #if inventory is empty
-            await ctx.send("Your inventory is empty, try 322 buy to purchase items.")
-        else:
-            indexes = take_index(storevalues, str_itemlist)         #take the indexes the available items inside the list of all store items
-            inventory = [storekeys[i] for i in indexes]     #create the actual list of strings of available inventory items
-            items_listed = "``, ``".join(inventory)         #create a string to be put into the message
-            await ctx.send(f"You have ``{items_listed}`` in your inventory.")
+        try:
+            users = open_json("users.json")
+            id = str(ctx.author.id)
+            if id not in users.keys():
+                await ctx.send("""You haven't got an inventory yet, try "322 help" and use Quiz commands to earn gold and buy items!""")
+                return
+            str_itemlist = users[id]["items"]         #get list of items the user has(they're integers)
+            if len(str_itemlist) == 0:              #if inventory is empty
+                await ctx.send("Your inventory is empty, try 322 buy to purchase items.")
+            else:
+                indexes = take_index(storevalues, str_itemlist)         #take the indexes the available items inside the list of all store items
+                inventory = [storekeys[i] for i in indexes]     #create the actual list of strings of available inventory items
+                items_listed = "``, ``".join(inventory)         #create a string to be put into the message
+                await ctx.send(f"You have ``{items_listed}`` in your inventory.")
+        except Exception as e:
+            print("store.py, inv: ", e)
 
 
     @commands.command(brief = "Give someone cheese.", aliases = ["give"])

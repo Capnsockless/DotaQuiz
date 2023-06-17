@@ -16,14 +16,14 @@ questlen, shopkeeplen, iconquizlen, scramblelen = len(questlist)-1, len(shopkeep
 #Prize percentages for 322 freeforall
 prizeperc = {0:0.6, 1:0.2, 2:0.1, 3:0.05, 4:0.05}
 
-jsondir = os.path.dirname(os.path.dirname(os.getcwd())) + "//jsonfiles"
+jsondir = os.path.dirname(os.path.dirname(os.getcwd())) + "/jsonfiles"
 
 def open_json(jsonfile):
-	with open(jsondir + '//' + jsonfile, "r") as fp:
+	with open(jsondir + '/' + jsonfile, "r") as fp:
 		return json.load(fp)	#openfunc for jsonfiles
 
 def save_json(jsonfile, name):	#savefunc for jsonfiles
-	with open(jsondir + '//' + jsonfile, "w") as fp:
+	with open(jsondir + '/' + jsonfile, "w") as fp:
 		json.dump(name, fp)
 
 def strip_str(text):		#function to remove punctuations, spaces and "the" from string and make it lowercase,
@@ -121,29 +121,32 @@ class Quizes(commands.Cog):
 	@commands.command(brief = "A single DotA related question for a bit of gold.", aliases = ["q"])
 	@commands.cooldown(1, 7, commands.BucketType.user)
 	async def quiz(self, ctx):
-		player = Player(ctx.author, ctx)
-		questn = player.unique_int_randomizer(questlen, "questnumbers")			#Random number to give a random question
-		questobj = questlist[questn]
-		question = questobj.get_question()
-		if questobj.questionType == 2:			#if the question comes with an image
-			await ctx.send(f"**```{question[0]}```**", file=discord.File(f"./quizimages/{question[1]}"))
-		else:											#for normal string questions
-			await ctx.send(f"**```{question}```**")
-		def check(m):
-			return m.channel == player.channel and m.author == player.author		#checks if the reply came from the same person in the same channel
 		try:
-			msg = await self.bot.wait_for("message", check=check, timeout=player.set_duration(22))
-		except asyncio.TimeoutError:		#If too late
-			await ctx.send(f"**{quizdata.get_answ('L')}** The correct answer was ``{questobj.get_answer()}``")
-		else:
-			if questobj.check_answer(msg.content, player.MKB):
-				g = player.add_gold(24)
-				await ctx.send(f"**{quizdata.get_answ('R')}** you got ``{g}`` gold.")
+			player = Player(ctx.author, ctx)
+			questn = player.unique_int_randomizer(questlen, "questnumbers")			#Random number to give a random question
+			questobj = questlist[questn]
+			question = questobj.get_question()
+			if questobj.questionType == 2:			#if the question comes with an image
+				await ctx.send(f"**```{question[0]}```**", file=discord.File(f"./quizimages/{question[1]}"))
+			else:											#for normal string questions
+				await ctx.send(f"**```{question}```**")
+			def check(m):
+				return m.channel == player.channel and m.author == player.author		#checks if the reply came from the same person in the same channel
+			try:
+				msg = await self.bot.wait_for("message", check=check, timeout=player.set_duration(22))
+			except asyncio.TimeoutError:		#If too late
+				await ctx.send(f"**{quizdata.get_answ('L')}** The correct answer was ``{questobj.get_answer()}``")
 			else:
-				straddon = 'The correct answer was'
-				if questobj.answerType != 1:
-					straddon = 'One of the possible correct answer was'
-				await ctx.send(f"**{quizdata.get_answ('W')}** {straddon} ``{questobj.get_answer()}``")
+				if questobj.check_answer(msg.content, player.MKB):
+					g = player.add_gold(24)
+					await ctx.send(f"**{quizdata.get_answ('R')}** you got ``{g}`` gold.")
+				else:
+					straddon = 'The correct answer was'
+					if questobj.answerType != 1:
+						straddon = 'One of the possible correct answer was'
+					await ctx.send(f"**{quizdata.get_answ('W')}** {straddon} ``{questobj.get_answer()}``")
+		except Exception as e:
+			print("quizes.py: ", e)
 
 	@commands.command(brief = "Recognize hero names among scrambled letters.", aliases = ["shuffle", "mix"])
 	@commands.cooldown(1, 8, commands.BucketType.user)

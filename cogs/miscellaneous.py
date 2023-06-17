@@ -62,10 +62,13 @@ class Miscellaneous(commands.Cog):
 
     @commands.command(brief = "Get a copy of a DotA copypasta.", aliases = ["pasta"])
     async def copypasta(self, ctx, pasta):
-        if strip_str(pasta) in list(copypastas.keys()):
-            await ctx.send(copypastas[strip_str(pasta)])
-        else:
-            await ctx.send("That is not one of the available copypastas: ", embed=pastalist)
+        try:
+            if strip_str(pasta) in list(copypastas.keys()):
+                await ctx.send(copypastas[strip_str(pasta)])
+            else:
+                await ctx.send("That is not one of the available copypastas: ", embed=pastalist)
+        except Exception as e:
+            print("miscallaneous.py: ", e)
 
     @commands.command()
     async def hohoohahaa(self, ctx):
