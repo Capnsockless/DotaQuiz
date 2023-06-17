@@ -55,17 +55,6 @@ class Store(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(brief = "Check how much gold and cheese you own.")
-    async def gold(self, ctx):
-        users = open_json("users.json")
-        id = str(ctx.author.id)
-        if id in users.keys():
-            authorgold = users[id]["gold"]
-            authorcheese = users[id]["cheese"]
-            await ctx.send(f"**{ctx.author.display_name}** you currently have **``{authorgold}``** gold and ``{authorcheese}`` cheese.")
-        else:
-            await ctx.send("""You haven't got any gold yet, try "322 help" and use Quiz commands to earn some.""")
-
     @commands.command(brief = "See what items are available.", aliases = ["shop"])
     async def store(self, ctx):
         artifacts = ""
@@ -142,6 +131,18 @@ class Store(commands.Cog):
         else:                 #if item doesn't exist at all
             await ctx.send("That item doesn't exist in the store.")
 
+    @commands.command(brief = "Check how much gold and cheese you own.")
+    async def gold(self, ctx):
+        users = open_json("users.json")
+        id = str(ctx.author.id)
+        if id in users.keys():
+            authorgold = users[id]["gold"]
+            authorcheese = users[id]["cheese"]
+            await ctx.send(f"**{ctx.author.display_name}** you currently have **``{authorgold}``** gold and ``{authorcheese}`` cheese.")
+        else:
+            await ctx.send("""You haven't got any gold yet, try "322 help" and use Quiz commands to earn some.""")
+
+
     @commands.command(brief = "Check your inventory.", aliases = ["inv"])
     async def inventory(self, ctx):         #check inventory
         users = open_json("users.json")
@@ -157,6 +158,7 @@ class Store(commands.Cog):
             inventory = [storekeys[i] for i in indexes]     #create the actual list of strings of available inventory items
             items_listed = "``, ``".join(inventory)         #create a string to be put into the message
             await ctx.send(f"You have ``{items_listed}`` in your inventory.")
+
 
     @commands.command(brief = "Give someone cheese.", aliases = ["give"])
     async def givecheese(self, ctx, reciever: discord.Member, amount:int):
