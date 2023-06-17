@@ -1,7 +1,11 @@
 import random
 import discord
-import os, json
+import os, sys, json
 from discord.ext import commands
+
+current = os.path.dirname(os.path.realpath(__file__))
+parent = os.path.dirname(current)
+sys.path.append(parent)
 import quizdata
 
 os.chdir(os.getcwd())
