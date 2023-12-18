@@ -2,16 +2,16 @@ import random
 import discord
 import json, time, os, asyncio
 from fuzzywuzzy import fuzz
-from mutagen.mp3 import MP3
 from discord.ext import commands
+import quizdata
 
 os.chdir(os.getcwd())
 
 #importing all quizes from quizdata
-import quizdata
 questlist, shopkeeplist, iconquizlist, scramblelist = quizdata.questlist, quizdata.shopkeeplist, quizdata.iconquizlist, quizdata.scramblelist
 #getting their lengths for the indicies, hence the -1
 questlen, shopkeeplen, iconquizlen, scramblelen = len(questlist)-1, len(shopkeeplist)-1, len(iconquizlist)-1, len(scramblelist)-1
+
 
 #Prize percentages for 322 freeforall
 prizeperc = {0:0.6, 1:0.2, 2:0.1, 3:0.05, 4:0.05}
